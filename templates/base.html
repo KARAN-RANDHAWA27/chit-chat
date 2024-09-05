@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Chit Chat{% endblock %}</title>
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-blue-600 p-4 text-white">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{% url 'home' %}" class="text-2xl font-bold">Chit Chat</a>
+            <div>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'chat:room_list' %}" class="px-3 py-2 rounded hover:bg-blue-700">Chat Rooms</a>
+                    <a href="{% url 'profile' %}" class="px-3 py-2 rounded hover:bg-blue-700">Profile</a>
+                    <a href="{% url 'logout' %}" class="px-3 py-2 rounded hover:bg-blue-700">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="px-3 py-2 rounded hover:bg-blue-700">Login</a>
+                    <a href="{% url 'register' %}" class="px-3 py-2 rounded hover:bg-blue-700">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-4 p-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="bg-gray-200 p-4 mt-8">
+        <div class="container mx-auto text-center">
+            &copy; {% now "Y" %} Chit Chat. All rights reserved.
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
