@@ -1,25 +1,146 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Welcome to Chit Chat{% endblock %}
+{% block title %}
+  Chit Chat - Connect, Share, Discover
+{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold mb-4">Welcome to Chit Chat</h1>
-    <p class="mb-4">Start chatting with friends and meet new people!</p>
-    
-    {% if user.is_authenticated %}
-        <a href="{% url 'chat:room_list' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Go to Chat Rooms
-        </a>
-    {% else %}
-        <div class="space-x-4">
-            <a href="{% url 'login' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Login
-            </a>
-            <a href="{% url 'register' %}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                Register
-            </a>
+  <div class="bg-gradient-to-b from-blue-100 to-white min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+      <!-- Hero Section -->
+      <div class="text-center mb-16">
+        {% comment %} <h1 class="text-5xl md:text-6xl font-extrabold text-blue-600 mb-4">Welcome to Chit Chat</h1> {% endcomment %}
+        <p class="text-xl md:text-2xl text-gray-600 mb-8">Connect with friends, share moments, and discover new conversations.</p>
+        {% if user.is_authenticated %}
+          <a href="{% url 'chat:room_list' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 shadow-lg hover:shadow-xl">Start Chatting</a>
+        {% else %}
+          <div class="space-x-4">
+            <a href="{% url 'accounts:login' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 shadow-lg hover:shadow-xl">Login</a>
+            <a href="{% url 'accounts:register' %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 shadow-lg hover:shadow-xl">Join Now</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- 3D Image Slider -->
+      <div class="relative h-96 mb-16 overflow-hidden">
+        <div id="slider" class="absolute w-full h-full transition-transform duration-500 ease-in-out">
+          <img src="{% static 'images/img1.png' %}" alt="Chit Chat Feature 1" class="absolute w-full h-full object-cover rounded-lg shadow-lg" />
+          <img src="{% static 'images/img2.png' %}" alt="Chit Chat Feature 2" class="absolute w-full h-full object-cover rounded-lg shadow-lg" />
+          <img src="{% static 'images/img3.png' %}" alt="Chit Chat Feature 3" class="absolute w-full h-full object-cover rounded-lg shadow-lg" />
+          <img src="{% static 'images/chit_chat4.png' %}" alt="Chit Chat Feature 4" class="absolute w-full h-full object-cover rounded-lg shadow-lg" />
         </div>
-    {% endif %}
-</div>
+        <button id="prevBtn" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 rounded-full p-2 focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <button id="nextBtn" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 rounded-full p-2 focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Features Section -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+          <img src="{% static 'images/chit_chat1.png' %}" alt="Connect" class="w-16 h-16 mb-4 mx-auto rounded-full" />
+          <h3 class="text-xl font-semibold mb-2 text-center">Connect Instantly</h3>
+          <p class="text-gray-600 text-center">Chat with friends and family in real-time, no matter where they are.</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+          <img src="{% static 'images/chit_chat2.png' %}" alt="Groups" class="w-16 h-16 mb-4 mx-auto rounded-full" />
+          <h3 class="text-xl font-semibold mb-2 text-center">Create Groups</h3>
+          <p class="text-gray-600 text-center">Bring people together with topic-based group chats and discussions.</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+          <img src="{% static 'images/img4.png' %}" alt="Secure" class="w-16 h-16 mb-4 mx-auto rounded-full" />
+          <h3 class="text-xl font-semibold mb-2 text-center">Secure Messaging</h3>
+          <p class="text-gray-600 text-center">Your conversations are protected with end-to-end encryption.</p>
+        </div>
+      </div>
+
+      <!-- Testimonial Section -->
+      <div class="bg-blue-50 p-8 rounded-lg shadow-inner mb-16">
+        <h2 class="text-3xl font-bold text-center mb-8">What Our Users Say</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {% for testimonial in testimonials %}
+            <div class="bg-white p-6 rounded-lg shadow-md flex items-start">
+              <img src=" {% if testimonial.user.avatar %}{{ testimonial.user.avatar.url }}{% endif %}" alt="{{ testimonial.user.username }}" class="w-12 h-12 rounded-full mr-4 object-cover" />
+              <div>
+                <p class="text-gray-600 mb-2">{{ testimonial.content }}</p>
+                <p class="font-semibold">- {{ testimonial.user.get_full_name|default:testimonial.user.username }}</p>
+              </div>
+            </div>
+          {% empty %}
+            <p class="text-center col-span-2">No testimonials yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Call to Action -->
+      <div class="text-center">
+        <h2 class="text-3xl font-bold mb-4">Ready to start chatting?</h2>
+        <p class="text-xl text-gray-600 mb-8">Join millions of users and experience the joy of seamless communication.</p>
+        {% if user.is_authenticated %}
+          <a href="{% url 'chat:room_list' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 shadow-lg hover:shadow-xl">Explore Chat Rooms</a>
+        {% else %}
+          <a href="{% url 'accounts:register' %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 shadow-lg hover:shadow-xl">Sign Up Now</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <style>
+    #slider {
+      transform-style: preserve-3d;
+    }
+    #slider img {
+      backface-visibility: hidden;
+      transition: transform 0.5s ease-in-out;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const slider = document.getElementById('slider')
+      const prevBtn = document.getElementById('prevBtn')
+      const nextBtn = document.getElementById('nextBtn')
+      const slides = slider.getElementsByTagName('img')
+      let currentSlide = 0
+    
+      function updateSlider() {
+        for (let i = 0; i < slides.length; i++) {
+          const offset = i - currentSlide
+          const zIndex = offset === 0 ? 3 : 2
+          const opacity = offset === 0 ? 1 : 0.7
+          const scale = offset === 0 ? 1 : 0.8
+          const translateX = `${offset * 50}%`
+    
+          slides[i].style.transform = `translateX(${translateX}) scale(${scale}) translateZ(${-Math.abs(offset) * 100}px)`
+          slides[i].style.zIndex = zIndex
+          slides[i].style.opacity = opacity
+        }
+      }
+    
+      function nextSlide() {
+        currentSlide = (currentSlide + 1) % slides.length
+        updateSlider()
+      }
+    
+      function prevSlide() {
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length
+        updateSlider()
+      }
+    
+      nextBtn.addEventListener('click', nextSlide)
+      prevBtn.addEventListener('click', prevSlide)
+    
+      updateSlider()
+    
+      // Auto-play the slider
+      setInterval(nextSlide, 5000)
+    })
+  </script>
 {% endblock %}

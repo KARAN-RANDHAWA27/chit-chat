@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Your Chats</h1>
+<a href="{% url 'create_chat' %}">Start New Chat</a>
+<a href="{% url 'create_group_chat' %}">Create Group Chat</a>
+<ul>
+    {% for chat in chats %}
+    <li>
+        <a href="{% url 'chat_room' chat.id %}">
+            {% if chat.is_group_chat %}
+                {{ chat.name }}
+            {% else %}
+                {% for participant in chat.participants.all %}
+                    {% if participant != request.user %}
+                        {{ participant.username }}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

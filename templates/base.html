@@ -1,41 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Chit Chat{% endblock %}</title>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}
+        Chit Chat
+      {% endblock %}
+    </title>
     {% load static %}
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    {% block extra_css %}{% endblock %}
-</head>
-<body class="bg-gray-100">
-    <nav class="bg-blue-600 p-4 text-white">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="{% url 'home' %}" class="text-2xl font-bold">Chit Chat</a>
-            <div>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'chat:room_list' %}" class="px-3 py-2 rounded hover:bg-blue-700">Chat Rooms</a>
-                    <a href="{% url 'profile' %}" class="px-3 py-2 rounded hover:bg-blue-700">Profile</a>
-                    <a href="{% url 'logout' %}" class="px-3 py-2 rounded hover:bg-blue-700">Logout</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="px-3 py-2 rounded hover:bg-blue-700">Login</a>
-                    <a href="{% url 'register' %}" class="px-3 py-2 rounded hover:bg-blue-700">Register</a>
-                {% endif %}
-            </div>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}" />
+    {% block extra_css %}
+
+    {% endblock %}
+  </head>
+  <body class="flex flex-col h-full bg-gray-100">
+    {% comment %} {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
+        {% endfor %}
+    </div>
+    {% endif %} {% endcomment %}
+    <nav class="bg-blue-600 p-4 text-white">
+      <div class="container mx-auto">
+        <div class="flex justify-between items-center">
+          <a href="{% url 'home' %}" class="text-2xl font-bold">Chit Chat</a>
+          <button class="lg:hidden focus:outline-none" id="menu-toggle">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+          </button>
+          <div class="hidden lg:flex lg:items-center space-x-4" id="menu-large">
+            {% if user.is_authenticated %}
+              <a href="{% url 'chat:room_list' %}" class="px-3 py-2 rounded hover:bg-blue-700">Chat Rooms</a>
+              <a href="{% url 'accounts:profile' %}" class="px-3 py-2 rounded hover:bg-blue-700">Profile</a>
+              <a href="{% url 'accounts:logout' %}" class="spx-3 py-2 rounded hover:bg-blue-700">Logout</a>
+            {% else %}
+              <a href="{% url 'accounts:login' %}" class="px-3 py-2 rounded hover:bg-blue-700">Login</a>
+              <a href="{% url 'accounts:register' %}" class="px-3 py-2 rounded hover:bg-blue-700">Register</a>
+            {% endif %}
+          </div>
+        </div>
+        <div class="lg:hidden mt-4 hidden" id="menu-small">
+          {% if user.is_authenticated %}
+            <a href="{% url 'chat:room_list' %}" class="block px-3 py-2 rounded hover:bg-blue-700">Chat Rooms</a>
+            <a href="{% url 'accounts:profile' %}" class="block px-3 py-2 rounded hover:bg-blue-700">Profile</a>
+            <a href="{% url 'accounts:logout' %}" class="block px-3 py-2 rounded hover:bg-blue-700">Logout</a>
+          {% else %}
+            <a href="{% url 'accounts:login' %}" class="block px-3 py-2 rounded hover:bg-blue-700">Login</a>
+            <a href="{% url 'accounts:register' %}" class="block px-3 py-2 rounded hover:bg-blue-700">Register</a>
+          {% endif %}
+        </div>
+      </div>
     </nav>
 
-    <main class="container mx-auto mt-4 p-4">
-        {% block content %}
-        {% endblock %}
+    <main class="flex-grow container mx-auto p-4">
+      {% block content %}
+
+      {% endblock %}
     </main>
 
     <footer class="bg-gray-200 p-4 mt-8">
-        <div class="container mx-auto text-center">
-            &copy; {% now "Y" %} Chit Chat. All rights reserved.
-        </div>
+      <div class="container mx-auto text-center">
+        &copy;{% now 'Y' %}Chit Chat. All rights reserved.
+      </div>
     </footer>
 
-    {% block extra_js %}{% endblock %}
-</body>
+    <script>
+      document.getElementById('menu-toggle').addEventListener('click', function () {
+        var menuSmall = document.getElementById('menu-small')
+        menuSmall.classList.toggle('hidden')
+      })
+    </script>
+
+    {% block extra_js %}
+
+    {% endblock %}
+  </body>
 </html>

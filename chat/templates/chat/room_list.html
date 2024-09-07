@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="flex h-full mt-4 bg-gray-100">
+    <!-- Sidebar -->
+    <div class="w-80 bg-white border-r border-gray-300 flex flex-col">
+      <!-- Header -->
+      <div class="p-3 border-b border-gray-300 flex justify-between items-center">
+        <div class="flex items-center">
+          <img src="{{ request.user.profile_picture.url|default:'https://via.placeholder.com/32' }}" alt="Profile" class="w-8 h-8 rounded-full mr-2" />
+          <h1 class="text-lg font-semibold">Chats</h1>
+        </div>
+        <div class="flex space-x-2">
+          <a href="{% url 'chat:create_chat' %}" class="p-2 rounded-full hover:bg-gray-200" title="New Message">
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+            </svg>
+          </a>
+          <button onclick="alert('Settings functionality coming soon!')" class="p-2 rounded-full hover:bg-gray-200" title="Settings">
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="p-2">
+        <div class="relative">
+          <input type="text" placeholder="Search Messenger" class="w-full py-1.5 pl-8 pr-3 text-sm text-gray-700 bg-gray-100 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-300" />
+          <div class="absolute inset-y-0 left-0 flex items-center pl-2">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat List -->
+      <div class="flex-1 overflow-y-auto">
+        {% for chat in chats %}
+          <a href="{% url 'chat:room_detail' chat.id %}" class="flex items-center px-3 py-2 hover:bg-gray-100 {% if chat.unread_messages %}bg-blue-50{% endif %}">
+            <img src="{{ chat.other_participant.profile_picture.url|default:'https://via.placeholder.com/32' }}" alt="{{ chat.name }}" class="w-10 h-10 rounded-full mr-3" />
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm font-semibold text-gray-900 truncate">{{ chat.name }}</h3>
+              <p class="text-xs text-gray-600 truncate">{{ chat.last_message.content|default:'No messages yet' }}</p>
+            </div>
+            <div class="text-xs text-gray-500 ml-2 flex flex-col items-end">
+              <span>{{ chat.last_message_time|date:'H:i' }}</span>
+              {% if chat.unread_messages %}
+                <span class="mt-1 bg-blue-500 text-white rounded-full px-1.5 py-0.5 text-xs">{{ chat.unread_messages }}</span>
+              {% endif %}
+            </div>
+          </a>
+        {% empty %}
+          <div class="flex flex-col items-center justify-center h-full text-gray-500">
+            <svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            </svg>
+            <p class="text-sm mb-3">No conversations yet</p>
+            <a href="{% url 'chat:create_chat' %}" class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Start a new chat</a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="flex-1 flex flex-col bg-white">
+      <div class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <svg class="w-20 h-20 text-gray-300 mb-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+          </svg>
+          <h2 class="text-xl font-semibold text-gray-700 mb-2">Welcome to ChitChat</h2>
+          <p class="text-sm text-gray-500">Select a conversation or start a new one</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const searchInput = document.querySelector('input[placeholder="Search Messenger"]')
+      const chatItems = document.querySelectorAll('.flex-1.overflow-y-auto > a')
+    
+      searchInput.addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase()
+        chatItems.forEach((item) => {
+          const chatName = item.querySelector('h3').textContent.toLowerCase()
+          const lastMessage = item.querySelector('p').textContent.toLowerCase()
+          if (chatName.includes(searchTerm) || lastMessage.includes(searchTerm)) {
+            item.style.display = ''
+          } else {
+            item.style.display = 'none'
+          }
+        })
+      })
+    })
+  </script>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify OTP - Chit Chat{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-8">
+    <div class="max-w-md mx-auto bg-white p-8 border border-gray-300 rounded-lg shadow-lg">
+        <h2 class="text-2xl font-bold mb-6 text-center">Verify Your Email</h2>
+        <p class="mb-4 text-center">Please enter the OTP sent to your email address.</p>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="mb-4">
+                <label for="{{ form.otp.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">Enter OTP:</label>
+                {{ form.otp }}
+                {{ form.otp.errors }}
+            </div>
+            <div class="flex items-center justify-between">
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                    Verify OTP
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,28 +1,203 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="max-w-md mx-auto mt-10">
-    <h2 class="text-2xl font-bold mb-4">Profile</h2>
-    <form method="post" enctype="multipart/form-data" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        {% csrf_token %}
-        {% for field in form %}
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id_for_label }}">
-                    {{ field.label }}
-                </label>
-                {{ field }}
-                {% if field.errors %}
-                    {% for error in field.errors %}
-                        <p class="text-red-500 text-xs italic">{{ error }}</p>
-                    {% endfor %}
-                {% endif %}
-            </div>
-        {% endfor %}
-        <div class="flex items-center justify-between">
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                Update Profile
-            </button>
+  <div class="max-w-8xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
+    <div class="relative h-96 bg-gray-300">
+      {% if user.cover_image %}
+        <img src="{{ user.cover_image.url }}" alt="Cover Image" class="w-full h-full object-cover" />
+      {% else %}
+        <div class="w-full h-full bg-gray-300"></div>
+      {% endif %}
+      <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
+        {% if user.avatar %}
+          <img src="{{ user.avatar.url }}" alt="Avatar" class="w-48 h-48 rounded-full border-4 border-white object-cover" />
+        {% else %}
+          <div class="w-48 h-48 rounded-full border-4 border-white bg-gray-400 flex items-center justify-center text-white text-5xl font-bold">{{ user.username|first|upper }}</div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="pt-32 px-4 sm:px-8 pb-8">
+      <div class="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-8">
+        <div class="text-center sm:text-left mb-4 sm:mb-0">
+          <h1 class="text-4xl font-bold">{{ user.get_full_name|default:user.username }}</h1>
+          <p class="text-xl text-gray-600">@{{ user.username }}</p>
         </div>
-    </form>
-</div>
+        <button id="editProfileBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg text-lg w-full sm:w-auto">
+          Edit Profile
+        </button>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div class="col-span-2">
+          <h2 class="text-2xl font-semibold mb-4">About</h2>
+          <p class="text-lg mb-6">{{ user.bio|default:'No bio provided' }}</p>
+          
+          <h2 class="text-2xl font-semibold mb-4">Contact Information</h2>
+          <ul class="space-y-2 text-lg">
+            <li><span class="font-semibold">Email:</span> {{ user.email }}</li>
+            <li><span class="font-semibold">Phone:</span> {{ user.phone_number|default:'Not provided' }}</li>
+          </ul>
+        </div>
+        <div>
+          <h2 class="text-2xl font-semibold mb-4">Details</h2>
+          <ul class="space-y-4 text-lg">
+            <li>
+              <span class="font-semibold block">Location</span>
+              {{ user.location|default:'Not provided' }}
+            </li>
+            <li>
+              <span class="font-semibold block">Joined</span>
+              {{ user.date_joined|date:"F Y" }}
+            </li>
+            <!-- Add more user details here -->
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Profile Dialog -->
+  <div id="editProfileDialog" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-10 mx-auto p-8 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
+      <h3 class="text-3xl font-bold text-gray-900 mb-6">Edit Profile</h3>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="md:col-span-1">
+            <div class="mb-6">
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.avatar.id_for_label }}">Profile Picture</label>
+              <div class="flex flex-col items-center">
+                <div class="w-48 h-48 mb-4 overflow-hidden rounded-full bg-gray-200">
+                  {% if user.avatar %}
+                    <img id="avatarPreview" src="{{ user.avatar.url }}" alt="Current Avatar" class="w-full h-full object-cover">
+                  {% else %}
+                    <div id="avatarPreview" class="w-full h-full flex items-center justify-center text-gray-500">No Image</div>
+                  {% endif %}
+                </div>
+                <input type="file" name="{{ form.avatar.name }}" id="{{ form.avatar.id_for_label }}" class="hidden" accept="image/*">
+                <label for="{{ form.avatar.id_for_label }}" class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                  Change Profile Picture
+                </label>
+              </div>
+              {% if form.avatar.errors %}
+                {% for error in form.avatar.errors %}
+                  <p class="text-red-500 text-xs italic mt-1">{{ error }}</p>
+                {% endfor %}
+              {% endif %}
+            </div>
+            
+            <div class="mb-6">
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.cover_image.id_for_label }}">Cover Photo</label>
+              <div class="flex flex-col items-center">
+                <div class="w-full h-32 mb-4 overflow-hidden rounded bg-gray-200">
+                  {% if user.cover_image %}
+                    <img id="coverPreview" src="{{ user.cover_image.url }}" alt="Current Cover" class="w-full h-full object-cover">
+                  {% else %}
+                    <div id="coverPreview" class="w-full h-full flex items-center justify-center text-gray-500">No Image</div>
+                  {% endif %}
+                </div>
+                <input type="file" name="{{ form.cover_image.name }}" id="{{ form.cover_image.id_for_label }}" class="hidden" accept="image/*">
+                <label for="{{ form.cover_image.id_for_label }}" class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                  Change Cover Photo
+                </label>
+              </div>
+              {% if form.cover_image.errors %}
+                {% for error in form.cover_image.errors %}
+                  <p class="text-red-500 text-xs italic mt-1">{{ error }}</p>
+                {% endfor %}
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="md:col-span-2">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {% for field in form %}
+                {% if field.name != 'avatar' and field.name != 'cover_image' %}
+                  <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                      {% for error in field.errors %}
+                        <p class="text-red-500 text-xs italic mt-1">{{ error }}</p>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-8 flex justify-end">
+          <button type="button" id="cancelBtn" class="px-6 py-3 bg-gray-300 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 mr-4">
+            Cancel
+          </button>
+          <button type="submit" class="px-6 py-3 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const editProfileBtn = document.getElementById('editProfileBtn');
+    const editProfileDialog = document.getElementById('editProfileDialog');
+    const cancelBtn = document.getElementById('cancelBtn');
+    
+    editProfileBtn.addEventListener('click', () => {
+      editProfileDialog.classList.remove('hidden');
+    });
+    
+    function closeDialog() {
+      editProfileDialog.classList.add('hidden');
+    }
+    
+    editProfileDialog.addEventListener('click', (e) => {
+      if (e.target === editProfileDialog) {
+        closeDialog();
+      }
+    });
+    
+    cancelBtn.addEventListener('click', closeDialog);
+    
+    // Preview images
+    function previewImage(input, previewId) {
+      const preview = document.getElementById(previewId);
+      const file = input.files[0];
+      const reader = new FileReader();
+    
+      reader.onloadend = function () {
+        if (preview.tagName.toLowerCase() === 'img') {
+          preview.src = reader.result;
+        } else {
+          preview.innerHTML = '';
+          const img = document.createElement('img');
+          img.src = reader.result;
+          img.className = 'w-full h-full object-cover';
+          preview.appendChild(img);
+        }
+      }
+    
+      if (file) {
+        reader.readAsDataURL(file);
+      } else {
+        if (preview.tagName.toLowerCase() === 'img') {
+          preview.src = '';
+        } else {
+          preview.innerHTML = 'No Image';
+        }
+      }
+    }
+    
+    document.getElementById('{{ form.avatar.id_for_label }}').addEventListener('change', function () {
+      previewImage(this, 'avatarPreview');
+    });
+    
+    document.getElementById('{{ form.cover_image.id_for_label }}').addEventListener('change', function () {
+      previewImage(this, 'coverPreview');
+    });
+  </script>
 {% endblock %}

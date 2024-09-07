@@ -1,28 +1,236 @@
 {% extends 'base.html' %}
 
+{% block extra_css %}
+<style>
+    .password-strength-meter {
+        width: 100%;
+        height: 5px;
+        background-color: #ddd;
+        margin-top: 5px;
+        border-radius: 2.5px;
+        overflow: hidden;
+    }
+    .password-strength-meter div {
+        height: 100%;
+        width: 0;
+        transition: width 0.5s ease-in-out;
+    }
+    .password-strength-text {
+        font-size: 0.8rem;
+        margin-top: 5px;
+    }
+    .requirement-item {
+        transition: color 0.3s ease-in-out;
+    }
+    .password-toggle-icon {
+        cursor: pointer;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    .register-container {
+        background-color: #f3f4f6;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .form-container, .requirements-container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="max-w-md mx-auto mt-10">
-    <h2 class="text-2xl font-bold mb-4">Register</h2>
-    <form method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        {% csrf_token %}
-        {% for field in form %}
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id_for_label }}">
-                    {{ field.label }}
-                </label>
-                {{ field }}
-                {% if field.errors %}
-                    {% for error in field.errors %}
-                        <p class="text-red-500 text-xs italic">{{ error }}</p>
+<div class="container mx-auto mt-10 px-4">
+    <div class="register-container p-8">
+        <h2 class="text-3xl font-bold mb-8 text-center text-gray-800">Create Your Account</h2>
+        <div class="flex flex-col md:flex-row md:space-x-8 items-start">
+            <div class="w-full md:w-1/2 form-container p-6">
+                <form method="post" id="registerForm" class="space-y-6">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="relative">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {% if field.name == 'password1' or field.name == 'password2' %}
+                                <div class="relative">
+                                    {{ field }}
+                                    <span class="password-toggle-icon text-gray-500">
+                                        <i class="fas fa-eye"></i>
+                                    </span>
+                                </div>
+                                {% if field.name == 'password1' %}
+                                    <div class="password-strength-meter mt-2">
+                                        <div id="strength-meter"></div>
+                                    </div>
+                                    <p class="password-strength-text text-gray-600" id="password-strength"></p>
+                                {% endif %}
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <p class="text-red-500 text-xs italic mt-1">{{ error }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
                     {% endfor %}
-                {% endif %}
+                    <p id="password-match" class="text-sm mt-1"></p>
+                    <div class="flex items-center justify-between">
+                        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105" type="submit">Register</button>
+                    </div>
+                </form>
             </div>
-        {% endfor %}
-        <div class="flex items-center justify-between">
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                Register
-            </button>
+            <div class="w-full md:w-1/2 md:mt-0 mt-8 requirements-container p-6">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">Password Requirements</h3>
+                <ul class="space-y-3">
+                    <li class="requirement-item flex items-center" id="length">
+                        <i class="fas fa-circle text-xs mr-2"></i>
+                        <span>At least 8 characters long</span>
+                    </li>
+                    <li class="requirement-item flex items-center" id="uppercase">
+                        <i class="fas fa-circle text-xs mr-2"></i>
+                        <span>Contains uppercase letter</span>
+                    </li>
+                    <li class="requirement-item flex items-center" id="lowercase">
+                        <i class="fas fa-circle text-xs mr-2"></i>
+                        <span>Contains lowercase letter</span>
+                    </li>
+                    <li class="requirement-item flex items-center" id="number">
+                        <i class="fas fa-circle text-xs mr-2"></i>
+                        <span>Contains number</span>
+                    </li>
+                    <li class="requirement-item flex items-center" id="special">
+                        <i class="fas fa-circle text-xs mr-2"></i>
+                        <span>Contains special character</span>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </form>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('id_password1');
+    const confirmPasswordInput = document.getElementById('id_password2');
+    const strengthMeter = document.getElementById('strength-meter');
+    const strengthText = document.getElementById('password-strength');
+    const passwordMatchText = document.getElementById('password-match');
+    const requirements = {
+        length: document.getElementById('length'),
+        uppercase: document.getElementById('uppercase'),
+        lowercase: document.getElementById('lowercase'),
+        number: document.getElementById('number'),
+        special: document.getElementById('special')
+    };
+
+    const updateStrength = (password) => {
+        let strength = 0;
+        let checks = 0;
+
+        if (password.length >= 8) {
+            strength += 20;
+            checks++;
+            requirements.length.style.color = 'green';
+            requirements.length.querySelector('i').className = 'fas fa-check-circle text-green-500 mr-2';
+        } else {
+            requirements.length.style.color = 'red';
+            requirements.length.querySelector('i').className = 'fas fa-times-circle text-red-500 mr-2';
+        }
+
+        if (/[A-Z]/.test(password)) {
+            strength += 20;
+            checks++;
+            requirements.uppercase.style.color = 'green';
+            requirements.uppercase.querySelector('i').className = 'fas fa-check-circle text-green-500 mr-2';
+        } else {
+            requirements.uppercase.style.color = 'red';
+            requirements.uppercase.querySelector('i').className = 'fas fa-times-circle text-red-500 mr-2';
+        }
+
+        if (/[a-z]/.test(password)) {
+            strength += 20;
+            checks++;
+            requirements.lowercase.style.color = 'green';
+            requirements.lowercase.querySelector('i').className = 'fas fa-check-circle text-green-500 mr-2';
+        } else {
+            requirements.lowercase.style.color = 'red';
+            requirements.lowercase.querySelector('i').className = 'fas fa-times-circle text-red-500 mr-2';
+        }
+
+        if (/\d/.test(password)) {
+            strength += 20;
+            checks++;
+            requirements.number.style.color = 'green';
+            requirements.number.querySelector('i').className = 'fas fa-check-circle text-green-500 mr-2';
+        } else {
+            requirements.number.style.color = 'red';
+            requirements.number.querySelector('i').className = 'fas fa-times-circle text-red-500 mr-2';
+        }
+
+        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            strength += 20;
+            checks++;
+            requirements.special.style.color = 'green';
+            requirements.special.querySelector('i').className = 'fas fa-check-circle text-green-500 mr-2';
+        } else {
+            requirements.special.style.color = 'red';
+            requirements.special.querySelector('i').className = 'fas fa-times-circle text-red-500 mr-2';
+        }
+
+        strengthMeter.style.width = strength + '%';
+        if (strength <= 40) {
+            strengthMeter.style.backgroundColor = '#ff4d4d';
+            strengthText.textContent = 'Weak';
+            strengthText.style.color = '#ff4d4d';
+        } else if (strength <= 80) {
+            strengthMeter.style.backgroundColor = '#ffa64d';
+            strengthText.textContent = 'Moderate';
+            strengthText.style.color = '#ffa64d';
+        } else {
+            strengthMeter.style.backgroundColor = '#4CAF50';
+            strengthText.textContent = 'Strong';
+            strengthText.style.color = '#4CAF50';
+        }
+    };
+
+    const checkPasswordMatch = () => {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (password === confirmPassword && password !== '') {
+            passwordMatchText.textContent = 'Passwords match';
+            passwordMatchText.style.color = 'green';
+        } else if (confirmPassword !== '') {
+            passwordMatchText.textContent = 'Passwords do not match';
+            passwordMatchText.style.color = 'red';
+        } else {
+            passwordMatchText.textContent = '';
+        }
+    };
+
+    passwordInput.addEventListener('input', function() {
+        updateStrength(this.value);
+        checkPasswordMatch();
+    });
+
+    confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+    const toggleButtons = document.querySelectorAll('.password-toggle-icon');
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const input = this.previousElementSibling;
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+    });
+});
+</script>
 {% endblock %}
