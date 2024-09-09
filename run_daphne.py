@@ -7,7 +7,7 @@ from channels.auth import AuthMiddlewareStack
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chit_chat.settings')
 django.setup()
 
-from chat import routing  # Import routing after Django is set up
+from chat import routing
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
@@ -17,3 +17,7 @@ application = ProtocolTypeRouter({
         )
     ),
 })
+
+if __name__ == "__main__":
+    from daphne.cli import CommandLineInterface
+    CommandLineInterface().run(["-p", "8000", "run_daphne:application"])

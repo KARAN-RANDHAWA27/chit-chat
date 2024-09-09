@@ -1,43 +1,42 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{{ chat.name|default:"Chat" }}</h1>
-<div id="chat-messages">
+  <h1>{{ chat.name|default:'Chat' }}</h1>
+  <div id="chat-messages">
     {% for message in messages %}
-    <p>
+      <p>
         <strong>{{ message.sender.username }}:</strong> {{ message.content }}
-    </p>
+      </p>
     {% endfor %}
-</div>
-<form id="chat-form">
-    <input type="text" id="chat-message-input" required>
+  </div>
+  <form id="chat-form">
+    <input type="text" id="chat-message-input" required />
     <button type="submit">Send</button>
-</form>
+  </form>
 
-<script>
-    const chatSocket = new WebSocket(
-        'ws://' + window.location.host +
-        '/ws/chat/{{ chat.id }}/'
-    );
-
-    chatSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        document.querySelector('#chat-messages').innerHTML += '<p><strong>' + data.user_id + ':</strong> ' + data.message + '</p>';
-    };
-
-    chatSocket.onclose = function(e) {
-        console.error('Chat socket closed unexpectedly');
-    };
-
-    document.querySelector('#chat-form').onsubmit = function(e) {
-        e.preventDefault();
-        const messageInputDom = document.querySelector('#chat-message-input');
-        const message = messageInputDom.value;
-        chatSocket.send(JSON.stringify({
-            'message': message,
-            'user_id': '{{ request.user.id }}'
-        }));
-        messageInputDom.value = '';
-    };
-</script>
+  <script>
+    const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/{{ chat.id }}/')
+    
+    chatSocket.onmessage = function (e) {
+      const data = JSON.parse(e.data)
+      document.querySelector('#chat-messages').innerHTML += '<p><strong>' + data.user_id + ':</strong> ' + data.message + '</p>'
+    }
+    
+    chatSocket.onclose = function (e) {
+      console.error('Chat socket closed unexpectedly')
+    }
+    
+    document.querySelector('#chat-form').onsubmit = function (e) {
+      e.preventDefault()
+      const messageInputDom = document.querySelector('#chat-message-input')
+      const message = messageInputDom.value
+      chatSocket.send(
+        JSON.stringify({
+          message: message,
+          user_id: '{{ request.user.id }}'
+        })
+      )
+      messageInputDom.value = ''
+    }
+  </script>
 {% endblock %}

@@ -1,12 +1,9 @@
 #!/usr/bin/env python
-print("Starting manage.py")
-"""Django's command-line utility for administrative tasks."""
 import os
 import sys
 
-
-if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "chit_chat.settings")
+def main():
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chit_chat.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -16,3 +13,6 @@ if __name__ == "__main__":
             "forget to activate a virtual environment?"
         ) from exc
     execute_from_command_line(sys.argv)
+
+if __name__ == '__main__':
+    main()

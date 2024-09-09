@@ -67,7 +67,13 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           {% for testimonial in testimonials %}
             <div class="bg-white p-6 rounded-lg shadow-md flex items-start">
-              <img src=" {% if testimonial.user.avatar %}{{ testimonial.user.avatar.url }}{% endif %}" alt="{{ testimonial.user.username }}" class="w-12 h-12 rounded-full mr-4 object-cover" />
+              <img src=" {% if testimonial.user.avatar %}
+                  {{ testimonial.user.avatar.url }}
+                {% else %}
+                  {% static 'images/profile.png' %}
+                {% endif %}"
+                alt="{{ testimonial.user.username }}"
+                class="w-12 h-12 rounded-full mr-4 object-cover" />
               <div>
                 <p class="text-gray-600 mb-2">{{ testimonial.content }}</p>
                 <p class="font-semibold">- {{ testimonial.user.get_full_name|default:testimonial.user.username }}</p>
